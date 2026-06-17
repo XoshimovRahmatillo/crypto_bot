@@ -66,8 +66,15 @@ async def convert(message: types.Message):
         await message.answer("Avval coin tanla: /start")
         return
 
+    text = message.text.replace(",", ".")  # 1,5 → 1.5
+
     try:
-        amount = float(message.text)
+        amount = float(text)
+
+        if amount <= 0:
+            await message.answer("❌ 0 dan katta son yoz (masalan 0.5 yoki 1.5)")
+            return
+
         coin = user_state[user_id]
 
         price = await get_price(COINS[coin])
@@ -79,7 +86,7 @@ async def convert(message: types.Message):
         rub = usd * rates["rates"]["RUB"]
         stars = usd / 0.013
 
-        text = (
+        await message.answer(
             f"💱 {amount} {coin}\n\n"
             f"USD: {usd:.2f}\n"
             f"UZS: {uzs:.2f}\n"
@@ -87,10 +94,10 @@ async def convert(message: types.Message):
             f"STARS: {stars:.2f}"
         )
 
-        await message.answer(text)
-
-    except:
-        await message.answer("Faqat raqam yoz (masalan 1.5)")
+    except ValueError:
+        await message.answer(
+            "❌ Faqat raqam yozing\nMasalan: 1 yoki 0.5 yoki 1.5"
+        )
 
 
 async def main():
